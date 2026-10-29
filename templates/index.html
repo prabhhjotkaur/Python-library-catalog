@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Library Catalog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .book-cover-img {
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- NAVBAR (Clean: 'Library' with book icon, no 'python project' badge) -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-500 flex items-center justify-center text-white shadow-md shadow-amber-500/20">
+          <i data-lucide="book-marked" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="text-xl font-bold bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent">Library Catalog</span>
+        </div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button onclick="openAddModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-sm flex items-center gap-1.5 transition">
+          <i data-lucide="plus" class="w-4 h-4"></i> Add Book
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1">
+    
+    <!-- Hero Title (Clean: Just Title, no 'built with oops and all...') -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Library Catalog System</h1>
+      </div>
+
+      <!-- Live Search & Filters -->
+      <div class="flex flex-wrap sm:flex-nowrap items-center gap-3">
+        <div class="relative w-full sm:w-72">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+          <input type="text" id="searchInput" placeholder="Search by title or author..." class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
+        </div>
+        <select id="filterCategory" class="px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500 transition shadow-sm">
+          <option value="all">All Categories (105)</option>
+          <option value="Fiction">Fiction</option>
+          <option value="Non-Fiction">Non-Fiction</option>
+          <option value="Reference">Reference Only</option>
+          <option value="available">Available Only</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Collection</div>
+        <div class="text-2xl font-black text-slate-900 mt-1" id="statTotal">--</div>
+      </div>
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Available</div>
+        <div class="text-2xl font-black text-emerald-600 mt-1" id="statAvailable">--</div>
+      </div>
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="text-xs font-bold text-rose-600 uppercase tracking-wider">Checked Out</div>
+        <div class="text-2xl font-black text-rose-600 mt-1" id="statBorrowed">--</div>
+      </div>
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Reference Only</div>
+        <div class="text-2xl font-black text-indigo-600 mt-1" id="statReference">--</div>
+      </div>
+    </div>
+
+    <!-- BOOKS GRID (E-Commerce style with book covers) -->
+    <div id="booksGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+      <!-- Populated by JavaScript -->
+    </div>
+
+  </main>
+
+  <!-- ADD BOOK MODAL -->
+  <div id="addModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-5 h-5 text-amber-600"></i> Add Book to Catalog
+        </h3>
+        <button onclick="closeAddModal()" class="p-1 rounded-lg text-slate-400 hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="addBookForm" class="space-y-3.5 text-xs sm:text-sm">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Book ID</label>
+          <input type="text" id="addId" placeholder="e.g. B106" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Title</label>
+          <input type="text" id="addTitle" placeholder="Book Title" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Author</label>
+          <input type="text" id="addAuthor" placeholder="Author Name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Category</label>
+          <select id="addType" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 font-semibold">
+            <option value="fiction">Fiction</option>
+            <option value="non_fiction">Non-Fiction</option>
+            <option value="reference">Reference Book</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Genre / Subject / Edition</label>
+          <input type="text" id="addDetail" placeholder="e.g. Fantasy, Science, or 3rd Edition" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Book Cover Image URL (Optional)</label>
+          <input type="url" id="addCover" placeholder="https://example.com/cover.jpg" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div class="pt-2">
+          <button type="submit" class="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold shadow-md shadow-amber-500/20 transition">
+            Save Book
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FOOTER (Clean & simple as requested) -->
+  <footer class="bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p class="font-semibold text-slate-700">Library Catalog System</p>
+      <p>Submitted as a Mini Project for Python • 2026</p>
+    </div>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+
+    let allBooks = [];
+
+    async function loadBooks() {
+      try {
+        const res = await fetch('/api/books');
+        const data = await res.json();
+        if (data.success) {
+          allBooks = data.books;
+          renderBooks();
+          updateStats();
+        }
+      } catch (err) {
+        console.error("Failed to load books:", err);
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('statTotal').innerText = allBooks.length;
+      document.getElementById('statAvailable').innerText = allBooks.filter(b => b.is_available && !b.is_reference).length;
+      document.getElementById('statBorrowed').innerText = allBooks.filter(b => !b.is_available).length;
+      document.getElementById('statReference').innerText = allBooks.filter(b => b.is_reference).length;
+    }
+
+    function renderBooks() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      const cat = document.getElementById('filterCategory').value;
+      const grid = document.getElementById('booksGrid');
+      grid.innerHTML = '';
+
+      const filtered = allBooks.filter(b => {
+        const matchesQuery = b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query);
+        let matchesCat = true;
+        if (cat === 'available') matchesCat = b.is_available && !b.is_reference;
+        else if (cat === 'Fiction') matchesCat = b.category === 'Fiction';
+        else if (cat === 'Non-Fiction') matchesCat = b.category === 'Non-Fiction';
+        else if (cat === 'Reference') matchesCat = b.category === 'Reference';
+        return matchesQuery && matchesCat;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-16 text-center text-slate-400">
+            <i data-lucide="book-open" class="w-12 h-12 mx-auto mb-2 stroke-1"></i>
+            <p class="text-sm font-semibold">No books found matching criteria</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      filtered.forEach(b => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between group";
+
+        let statusBadge = "";
+        let actionBtn = "";
+
+        if (b.is_reference) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">Reference</span>`;
+          actionBtn = `<button disabled class="w-full py-2 bg-slate-100 text-slate-400 font-bold rounded-xl text-xs cursor-not-allowed">In-Library Only</button>`;
+        } else if (b.is_available) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Available</span>`;
+          actionBtn = `<button onclick="borrowBook('${b.book_id}')" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow-sm">Borrow</button>`;
+        } else {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Borrowed</span>`;
+          actionBtn = `<button onclick="returnBook('${b.book_id}')" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition shadow-sm">Return</button>`;
+        }
+
+        const fallbackImg = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&q=80";
+
+        card.innerHTML = `
+          <div>
+            <!-- Book Cover Image -->
+            <div class="relative w-full overflow-hidden bg-slate-100 border-b border-slate-100">
+              <img src="${b.cover_url || fallbackImg}" 
+                   alt="${b.title}" 
+                   loading="lazy"
+                   onerror="this.src='${fallbackImg}'"
+                   class="w-full book-cover-img group-hover:scale-105 transition duration-300">
+              <div class="absolute top-2 right-2">
+                ${statusBadge}
+              </div>
+              <div class="absolute bottom-2 left-2 bg-slate-900/70 backdrop-blur-sm text-white px-2 py-0.5 rounded text-[10px] font-mono">
+                ${b.book_id}
+              </div>
+            </div>
+
+            <!-- Book Info -->
+            <div class="p-3.5">
+              <h3 class="text-sm font-bold text-slate-900 line-clamp-1 mb-0.5" title="${b.title}">${b.title}</h3>
+              <p class="text-xs text-slate-500 font-medium line-clamp-1 mb-2">by ${b.author}</p>
+              <span class="inline-block px-2 py-0.5 rounded-md bg-slate-100 text-[10px] font-semibold text-slate-600">
+                ${b.category} • ${b.extra_info}
+              </span>
+            </div>
+          </div>
+
+          <div class="p-3.5 pt-0">
+            ${actionBtn}
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    async function borrowBook(bookId) {
+      const res = await fetch('/api/borrow', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ book_id: bookId })
+      });
+      const data = await res.json();
+      alert(data.message);
+      if (data.success) loadBooks();
+    }
+
+    async function returnBook(bookId) {
+      const res = await fetch('/api/return', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ book_id: bookId })
+      });
+      const data = await res.json();
+      alert(data.message);
+      if (data.success) loadBooks();
+    }
+
+    function openAddModal() {
+      document.getElementById('addModal').classList.remove('hidden');
+    }
+    function closeAddModal() {
+      document.getElementById('addModal').classList.add('hidden');
+    }
+
+    document.getElementById('addBookForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        book_id: document.getElementById('addId').value,
+        title: document.getElementById('addTitle').value,
+        author: document.getElementById('addAuthor').value,
+        type: document.getElementById('addType').value,
+        detail: document.getElementById('addDetail').value,
+        cover_url: document.getElementById('addCover').value
+      };
+
+      const res = await fetch('/api/add', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      alert(data.message);
+      if (data.success) {
+        closeAddModal();
+        document.getElementById('addBookForm').reset();
+        loadBooks();
+      }
+    });
+
+    document.getElementById('searchInput').addEventListener('input', renderBooks);
+    document.getElementById('filterCategory').addEventListener('change', renderBooks);
+
+    window.addEventListener('DOMContentLoaded', loadBooks);
+  </script>
+</body>
+</html>
